@@ -65,16 +65,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     public void paint(Graphics g) {
-        // Comprueba si el juego ha comenzado
-        if (snake.moves == 0) {
-            // Establece las posiciones iniciales de la serpiente
-            for (int i = 0; i < 5; i++) {
-                snake.snakexLength[i] = snakeHeadXPos;
-                snakeHeadXPos -= 6;
-                snake.snakeyLength[i] = 355;
-            }
-        }
-
         // Borde del título
         g.setColor(Color.WHITE);
         g.drawRect(24, 10, 852, 55);
@@ -105,9 +95,21 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         g.drawString("PUNTAJE : " + score.getScore(), 720, 110);
         g.drawRect(653, 130, 221, 1);
 
-        // Muestra el puntaje más alto
-        score.sortHighScore();
-        highScore = score.getHighScore();
+        // Comprueba si el juego ha comenzado
+        if (snake.moves == 0) {
+            // Establece las posiciones iniciales de la serpiente
+            for (int i = 0; i < 5; i++) {
+                snake.snakexLength[i] = snakeHeadXPos;
+                snakeHeadXPos -= 6;
+                snake.snakeyLength[i] = 355;
+            }
+            // Muestra el puntaje más alto
+            score.sortHighScore();
+            highScore = score.getHighScore();
+            g.drawString("HIGH SCORES", 705, 180);
+            drawString(g, highScore, 705, 200);
+        }
+
         g.drawString("HIGH SCORES", 705, 180);
         drawString(g, highScore, 705, 200);
 
