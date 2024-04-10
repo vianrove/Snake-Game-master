@@ -1,74 +1,86 @@
 package src;
 
 import java.io.*;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.time.LocalDate;
 import java.util.List;
 
 public class Score {
     private int score;
-
-    // Constructor
+    private String name;
+    private float time;
+    private LocalDate playedDate;
+    //konstruktor
     public Score(){
         this.score=0;
+        this.name = "";
+        this.playedDate = LocalDate.now();
+        this.time = 0;
     }
+    /*public Score(String name, float time, int score, Date playedtime){
+        this.score=score;
+        this.name = name;
+        this.playedDate = playedtime;
+        this.time = time;
+    }*/
 
-    // Aumenta el puntaje
+    //menambah score
     public void increaseScore(){
         this.score++;
     }
 
-    // Reinicia el puntaje
+    //reset Score
     public void resetScore(){
         this.score=0;
     }
 
-    // Devuelve el valor del puntaje para mostrarlo en Gameplay
+
     public int getScore(){
         return this.score;
     }
 
-    // Función para obtener el puntaje más alto
+    public void putName(String name){
+        this.name = name;
+    }
+
+    // Fungsi buat ambil HighScore
     public String getHighScore() {
-        FileReader readFile = null;
-        BufferedReader reader = null;
+        // SELECT TOP 10 * FROM jugador
+        String query = "SELECT * FROM jugador";
+        Statement stmt;
+        ResultSet rs;
+        int id, score;
+        float totaltime;
+        String name;
+        Date playedDate;
         try {
-            // Leer el archivo highscore.dat
-            readFile = new FileReader("highscore.dat");
-            reader = new BufferedReader(readFile);
-
-            String line = reader.readLine();
-            String allLines = line;
-
-            while (line != null) {
-                // Leer línea por línea
-                line = reader.readLine();
-                // Manejo de errores
-                if (line == null)
-                    break;
-                // Concatenar las líneas
-                allLines = allLines.concat("\n" + line);
+            // ReadFile highscore.dat
+            Connection conn = conexionToMYSQL();
+            String allLines = "";
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                id = rs.getInt("id");
+                name = rs.getString("name");
+                score = rs.getInt("score");
+                totaltime = rs.getFloat("totaltime");
+                playedDate = rs.getDate("playedDate");
+                System.out.println("id: "+id+", name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate);
+                //allLines += "name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate;
             }
 
-            // Devolver una cadena exactamente igual al contenido de highscore.dat
+            // return String yang persis seperti isi dari highscore.dat
             return allLines;
         }
-        // Si highscore.dat no existe
+        // Kalau highscore.dat nya gaada
         catch (Exception e) {
             return "0\n0\n0\n0\n0\n0\n0\n0\n0\n0";
-        } finally {
-            try {
-                // Cerrar el lector
-                if (reader != null)
-                    reader.close();
-            } // Manejo de excepciones
-            catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    // Función para ordenar el puntaje más alto
+    //fungsi untuk mengurutkan high score
     public void sortHighScore() {
         FileReader readFile = null;
         BufferedReader reader = null;
@@ -81,47 +93,49 @@ public class Score {
 
             String line = reader.readLine();
 
-            // Mover el contenido de highscore.dat a una lista
+            // Pindahkan isi dari highscore.dat ke sebuah array List
             while (line != null) {
                 list.add(Integer.parseInt(line));
                 line = reader.readLine();
             }
 
-            // Ordenar la lista
+            // Sort array listnya
             Collections.sort(list);
 
-            // Invertir para que sea descendente
+            // Balikin biar jadi descending
             Collections.reverse(list);
 
-            // Escribir en highscore.dat, el puntaje ordenado
+            // Tulis ke highscore.dat, score yang udah diurutin
             writeFile = new FileWriter("highscore.dat");
             writer = new BufferedWriter(writeFile);
 
             int size = list.size();
 
-            // Solo se escribirán los 10 puntajes más altos
+            // Nantinya akan hanya 10 skor teratas yang ditulis kembali
             for (int i = 0; i < 10; i++) {
-                // Para llenar con 0 si no hay suficientes puntajes
+                // Ini untuk mengisi nilai lainnya 0
                 if (i > size - 1) {
                     String def = "0";
                     writer.write(def);
-                } else { // Tomar uno de la lista
+                } else { // Ambil satu satu dari list
                     String str = String.valueOf(list.get(i));
                     writer.write(str);
                 }
-                writer.newLine();
+                if (i < 9) {// This prevent creating a blank like at the end of the file**
+                    writer.newLine();
+                }
             }
         } catch (Exception e) {
             return;
         } finally {
             try {
-                // Cerrar el lector
+                // Tutup readernya
                 if (reader != null)
                     reader.close();
-                // Cerrar el escritor
+                // Tutup writer
                 if (writer != null)
                     writer.close();
-            } // Manejo de excepciones
+            } // Kalau terjadi exception
             catch (IOException e) {
                 return;
             }
@@ -129,41 +143,42 @@ public class Score {
 
     }
 
-    // Función para escribir un nuevo puntaje en el archivo
+
     public void saveNewScore() {
-        String newScore = String.valueOf(this.getScore());
-        System.out.println(newScore);
-
-        // Crear un archivo para guardar el puntaje más alto
-        File scoreFile = new File("highscore.dat");
-
-        // Si el archivo highscore.dat no existe
-        if (!scoreFile.exists()) {
-            try {
-                // Crear un nuevo archivo
-                scoreFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        //
+        String query ="INSERT INTO jugador(name, score, totaltime, playedDate) VALUES ('"+this.name+"','"+this.score+"','"+this.time+"','"+this.playedDate+"')";
+        Statement stmt;
+        int result;
+        try{
+            Connection conn = conexionToMYSQL();
+            stmt = conn.createStatement();
+            result = stmt.executeUpdate(query);
+            if(result == 1) System.out.println("Resultados guardados");
+        }catch (SQLException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException(ex);
         }
 
-        FileWriter writeFile = null;
-        BufferedWriter writer = null;
+    }
+    public static Connection conexionToMYSQL(){
+        Connection connection;
+        try{
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/snakedb","root","2001");
+            System.out.println("Conexion con MySQL!!!");
+        }catch (SQLException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+        return connection;
+    }
 
-        try {
-            // Escribir el nuevo puntaje en el archivo
-            writeFile = new FileWriter(scoreFile, true);
-            writer = new BufferedWriter(writeFile);
-            writer.write(newScore);
-        } catch (Exception e) {
-            return;
-        } finally {
-            try {
-                if (writer != null)
-                    writer.close();
-            } catch (Exception e) {
-                return;
-            }
+    public static void Desconeccion(Connection db){
+        try{
+            db.close();
+            System.out.println("connection close to mysql");
+        }catch (SQLException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 }

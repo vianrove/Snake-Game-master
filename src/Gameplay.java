@@ -191,6 +191,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         // Verifica si el jugador ha muerto
         if (snake.death) {
             // Guarda el puntaje en el archivo highscore.dat
+            InputDataPanel frame = new InputDataPanel(score);
             score.saveNewScore();
 
             // Muestra el texto "¡Juego terminado!"
