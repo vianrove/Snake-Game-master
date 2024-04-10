@@ -106,8 +106,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
             // Muestra el puntaje más alto
             score.sortHighScore();
             highScore = score.getHighScore();
-            g.drawString("HIGH SCORES", 705, 180);
-            drawString(g, highScore, 705, 200);
         }
 
         g.drawString("HIGH SCORES", 705, 180);
