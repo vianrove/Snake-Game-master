@@ -7,6 +7,7 @@ import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyListener;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.awt.event.ActionEvent;
@@ -49,7 +50,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     Score score = new Score();
 
     // Dibuja el puntaje más alto
-    private String highScore;
+    private List<Score> highScore;
 
     // Para mostrar el controlador
     private ImageIcon arrowImage;
@@ -82,8 +83,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         g.fillRect(25, 72, 619, 613);
 
         // Borde para el marcador
-        g.setColor(Color.WHITE);
-        g.drawRect(653, 71, 223, 614);
+        g.setColor(Color.BLUE);
+        g.drawRect(653, 71, 300, 614);
 
         // Fondo del marcador
         g.setColor(Color.black);
@@ -104,13 +105,17 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                 snake.snakeyLength[i] = 355;
             }
             // Muestra el puntaje más alto
-            score.sortHighScore();
+            //score.sortHighScore();
             highScore = score.getHighScore();
         }
 
         g.drawString("HIGH SCORES", 705, 180);
-        drawString(g, highScore, 705, 200);
-
+        int esp = 220;
+        g.drawString("name - score - time - date",650,200);
+        for(Score results: highScore) {
+            drawString(g, results.readScore(), 690, esp);
+            esp += 20;
+        }
         // Muestra el controlador
         g.drawRect(653, 490, 221, 1);
         g.setFont(new Font("Helvetica", Font.BOLD, 25));

@@ -19,12 +19,12 @@ public class Score {
         this.playedDate = LocalDate.now();
         this.time = 0;
     }
-    /*public Score(String name, float time, int score, Date playedtime){
+    public Score(String name, float time, int score, LocalDate playedtime){
         this.score=score;
         this.name = name;
         this.playedDate = playedtime;
         this.time = time;
-    }*/
+    }
 
     //menambah score
     public void increaseScore(){
@@ -44,39 +44,49 @@ public class Score {
     public void putName(String name){
         this.name = name;
     }
-
+    public String readScore(){
+        return  ""+this.name+" - "+this.score+" - "+this.time+" - "+this.playedDate;
+    }
     // Fungsi buat ambil HighScore
-    public String getHighScore() {
+    public List<Score> getHighScore() {
         // SELECT TOP 10 * FROM jugador
-        String query = "SELECT * FROM jugador";
+        String query = "SELECT * FROM jugador LIMIT 10";
         Statement stmt;
         ResultSet rs;
         int id, score;
         float totaltime;
         String name;
         Date playedDate;
+        List<Score> list = new ArrayList<Score>();
         try {
             // ReadFile highscore.dat
             Connection conn = conexionToMYSQL();
-            String allLines = "";
+            //String allLines = "";
+
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
             while (rs.next()) {
+                Score newScore;
                 id = rs.getInt("id");
                 name = rs.getString("name");
                 score = rs.getInt("score");
                 totaltime = rs.getFloat("totaltime");
                 playedDate = rs.getDate("playedDate");
+                LocalDate cambio =  playedDate.toLocalDate();
+                newScore = new Score(name, totaltime, score, cambio);
+                list.add(newScore);
                 System.out.println("id: "+id+", name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate);
                 //allLines += "name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate;
             }
 
             // return String yang persis seperti isi dari highscore.dat
-            return allLines;
+            return list;
         }
         // Kalau highscore.dat nya gaada
-        catch (Exception e) {
-            return "0\n0\n0\n0\n0\n0\n0\n0\n0\n0";
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return list;
+            //throw new RuntimeException(ex);
         }
     }
 
