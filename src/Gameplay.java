@@ -197,7 +197,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         if (snake.death) {
             // Guarda el puntaje en el archivo highscore.dat
             InputDataPanel frame = new InputDataPanel(score);
-            score.saveNewScore();
 
             // Muestra el texto "¡Juego terminado!"
             g.setColor(Color.RED);
