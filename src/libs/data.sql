@@ -1,24 +1,13 @@
 drop database snakedb;
-CREATE DATABASE IF NOT exists snakedb;
+CREATE DATABASE IF NOT exists snakeDB;
 
 use snakedb;
 
-create table jugador(
+create table scores(
 	id int auto_increment,
-    name varchar(50) default "no name",
+    name varchar(10) default "no name",
     score int,
-    totaltime float,
-	playedDate DATE,
+    totalTime int,
+	playedDate TIMESTAMP,
     primary key (id)
 );
-
--- datos de prueba 
-INSERT INTO jugador(score, totaltime, playedDate) VALUES (12, 60.0, "2024-04-09");
-INSERT INTO jugador(score, totaltime, playedDate) VALUES (1, 10.0, "2024-04-09");
-INSERT INTO jugador(score, totaltime, playedDate) VALUES (5, 30.0, "2024-04-09");
-INSERT INTO jugador(score, totaltime, playedDate) VALUES (14, 65.0, "2024-04-09");
-INSERT INTO jugador(score, totaltime, playedDate) VALUES (2, 20.0, "2024-04-09");
-
-SELECT * FROM jugador;
-
-delete from jugador where id = 9;
