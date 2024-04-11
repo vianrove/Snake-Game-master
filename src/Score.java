@@ -10,16 +10,16 @@ import java.util.List;
 public class Score {
     private int score;
     private String name;
-    private float time;
-    private LocalDate playedDate;
+    private int time;
+    private Timestamp playedDate;
     //konstruktor
     public Score(){
         this.score=0;
         this.name = "";
-        this.playedDate = LocalDate.now();
+        this.playedDate = new Timestamp(System.currentTimeMillis());
         this.time = 0;
     }
-    public Score(String name, float time, int score, LocalDate playedtime){
+    public Score(String name, int time, int score, Timestamp playedtime){
         this.score=score;
         this.name = name;
         this.playedDate = playedtime;
@@ -44,19 +44,38 @@ public class Score {
     public void putName(String name){
         this.name = name;
     }
+
+    public void putTime(int time){
+        this.time = time;
+    }
+
+    public void putDate(Timestamp date){
+        this.playedDate = date;
+    }
     public String readScore(){
-        return  ""+this.name+" - "+this.score+" - "+this.time+" - "+this.playedDate;
+        return  ""+this.name+" - "+this.score+" - "+this.time;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public int getTime() {
+        return this.time;
     }
     // Fungsi buat ambil HighScore
     public List<Score> getHighScore() {
-        // SELECT TOP 10 * FROM jugador
-        String query = "SELECT * FROM jugador LIMIT 10";
+        // SELECT TOP 10 * FROM scores
+        String query =  "SELECT *\n" +
+                        "FROM scores\n" +
+                        "ORDER BY score DESC, totalTime ASC, playedDate ASC\n" +
+                        "LIMIT 10;";
         Statement stmt;
         ResultSet rs;
         int id, score;
-        float totaltime;
+        int totaltime;
         String name;
-        Date playedDate;
+        Timestamp playedDate;
         List<Score> list = new ArrayList<Score>();
         try {
             // ReadFile highscore.dat
@@ -70,12 +89,11 @@ public class Score {
                 id = rs.getInt("id");
                 name = rs.getString("name");
                 score = rs.getInt("score");
-                totaltime = rs.getFloat("totaltime");
-                playedDate = rs.getDate("playedDate");
-                LocalDate cambio =  playedDate.toLocalDate();
-                newScore = new Score(name, totaltime, score, cambio);
+                totaltime = rs.getInt("totaltime");
+                playedDate = rs.getTimestamp("playedDate");
+                newScore = new Score(name, totaltime, score, playedDate);
                 list.add(newScore);
-                System.out.println("id: "+id+", name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate);
+                // System.out.println("id: "+id+", name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate);
                 //allLines += "name: "+name+", score: "+score+", time: "+totaltime+", date: "+playedDate;
             }
 
@@ -156,7 +174,7 @@ public class Score {
 
     public void saveNewScore() {
         //
-        String query ="INSERT INTO jugador(name, score, totaltime, playedDate) VALUES ('"+this.name+"','"+this.score+"','"+this.time+"','"+this.playedDate+"')";
+        String query ="INSERT INTO scores(name, score, totaltime, playedDate) VALUES ('"+this.name+"','"+this.score+"','"+this.time+"','"+this.playedDate+"')";
         Statement stmt;
         int result;
         try{
@@ -173,7 +191,7 @@ public class Score {
     public static Connection conexionToMYSQL(){
         Connection connection;
         try{
-            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/snakedb","root","2001");
+            connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/snakedb","root","3xi5dzA*");
             System.out.println("Conexion con MySQL!!!");
         }catch (SQLException ex){
             System.out.println(ex.getMessage());
