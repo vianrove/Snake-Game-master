@@ -7,6 +7,7 @@ import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyListener;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,6 +28,10 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     private Timer timer;
     private int delay = 250;
+
+    private Timer scoreTimer;
+    private int scoreTimerDelay = 1000; // 1 Segundo
+    private int scoreTime = 0;
     private ImageIcon snakeBody;
 
     AtomicBoolean speedUp = new AtomicBoolean(true);
@@ -62,6 +67,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
         timer = new Timer(delay, this);
+        scoreTimer = new Timer(scoreTimerDelay, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                scoreTime++;
+            }
+        });
         timer.start();
     }
 
@@ -83,8 +94,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         g.fillRect(25, 72, 619, 613);
 
         // Borde para el marcador
-        g.setColor(Color.BLUE);
-        g.drawRect(653, 71, 300, 614);
+        g.setColor(Color.WHITE);
+        g.drawRect(653, 71, 223, 614);
 
         // Fondo del marcador
         g.setColor(Color.black);
@@ -93,8 +104,13 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         // Muestra el puntaje
         g.setColor(Color.white);
         g.setFont(new Font("Helvetica", Font.BOLD, 20));
-        g.drawString("PUNTAJE : " + score.getScore(), 720, 110);
-        g.drawRect(653, 130, 221, 1);
+        g.drawString("PUNTAJE : " + score.getScore(), 700, 110);
+        g.drawRect(653, 150, 221, 1);
+
+        // Muestra el tiempo
+        g.setColor(Color.white);
+        g.setFont(new Font("Helvetica", Font.BOLD, 14));
+        g.drawString("Tiempo : " + scoreTime, 720, 130);
 
         // Comprueba si el juego ha comenzado
         if (snake.moves == 0) {
@@ -104,16 +120,17 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                 snakeHeadXPos -= 6;
                 snake.snakeyLength[i] = 355;
             }
-            // Muestra el puntaje más alto
-            //score.sortHighScore();
             highScore = score.getHighScore();
         }
 
-        g.drawString("HIGH SCORES", 705, 180);
+        g.setFont(new Font("Helvetica", Font.BOLD, 20));
+        g.drawString("HIGH SCORES", 700, 180);
         int esp = 220;
-        g.drawString("name - score - time - date",650,200);
-        for(Score results: highScore) {
-            drawString(g, results.readScore(), 690, esp);
+        g.drawString("name - score - time",675,200);
+        for(Score result: highScore) {
+            drawString(g, result.getName(), 670, esp);
+            drawString(g, String.valueOf(result.getScore()), 790, esp);
+            drawString(g, String.valueOf(result.getTime()), 830, esp);
             esp += 20;
         }
         // Muestra el controlador
@@ -195,8 +212,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
         // Verifica si el jugador ha muerto
         if (snake.death) {
-            // Guarda el puntaje en el archivo highscore.dat
-            InputDataPanel frame = new InputDataPanel(score);
+            // Guarda el puntaje siempre que no sea cero
+            if(score.getScore() >= 1){
+                score.putTime(scoreTime);
+                score.putDate(new Timestamp(System.currentTimeMillis()));
+                InputDataPanel frame = new InputDataPanel(score);
+            }
 
             // Muestra el texto "¡Juego terminado!"
             g.setColor(Color.RED);
@@ -292,12 +313,16 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
                 if (snake.moves == 0) {
                     snake.moves++;
                     snake.right = true;
+
+                    scoreTime = 0;
+                    scoreTimer.start();
                 }
                 // Para reiniciar el juego después de morir
                 if (snake.death) {
                     snake.moves = 0;
                     snake.lengthOfSnake = 5;
                     score.resetScore();
+                    scoreTime = 0;
                     repaint();
                     snake.death = false;
                 }
